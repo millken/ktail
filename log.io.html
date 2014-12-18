@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<head>
+    <title>log.io</title>
+    <link href="log.io.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="web_client"><div id="log_controls"><a class="select_mode" href="#log_control_streams">Streams</a>
+<a class="select_mode active" href="#log_control_nodes">Nodes</a><div style="display: none;" class="object_controls" id="log_control_streams"><input class="filter" placeholder="Filter..." type="text">
+<div style="height: 477px;" class="groups"><div class="group"><div class="header"><div class="screen_buttons">
+
+  <input checked="checked" title="screen-c10" type="checkbox">
+
+  <input checked="checked" title="screen-c13" type="checkbox">
+
+</div>
+<div class="diode floatl active color6"></div>
+<div class="object_name floatl">nginx</div>
+<div style="clear: both;"></div></div><div class="items"><div class="item"><div class="screen_buttons">
+
+  <input checked="checked" title="screen-c10" type="checkbox">
+
+  <input checked="checked" title="screen-c13" type="checkbox">
+
+</div>
+<div class="diode floatl active color5"></div>
+<div class="item_name floatl">logio_webserver01</div>
+<div style="clear: both;"></div></div></div></div></div></div><div class="object_controls" id="log_control_nodes" style="display: block;"><input class="filter" placeholder="Filter..." type="text">
+<div style="height: 477px;" class="groups"><div class="group"><div class="header"><div class="screen_buttons">
+
+  <input checked="checked" title="screen-c10" type="checkbox">
+
+  <input checked="checked" title="screen-c13" type="checkbox">
+
+</div>
+<div class="diode floatl active color5"></div>
+<div class="object_name floatl">logio_webserver01</div>
+<div style="clear: both;"></div></div><div class="items"><div class="item"><div class="screen_buttons">
+
+  <input checked="checked" title="screen-c10" type="checkbox">
+
+  <input checked="checked" title="screen-c13" type="checkbox">
+
+</div>
+<div class="diode floatl active color6"></div>
+<div class="item_name floatl">nginx</div>
+<div style="clear: both;"></div></div></div></div></div></div></div><div style="width: 1430px;" id="log_screens"><div class="log_screens"><div class="log_screen"><div class="controls">
+
+  <a href="#" class="clear">clear</a>
+  <a href="#" class="filter">filter <input type="text"></a>
+</div>
+<div style="height: 842.5px;" class="messages">
+  <div class="msg" id="logbody">
+<!--
+<p>
+<span class="stream color6">nginx</span>
+<span class="node color5">logio_webserver01</span>
+<span class="message">194.254.145.253 - - [18/Dec/2014:09:23:37 +0000] "GET /favicon.ico HTTP/1.1" 200 1916 "-" "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0"</span>
+</p>
+-->
+</div>
+</div></div></div>
+<div class="status_bar">
+  <a href="#" class="button" id="new_screen_button">New Screen</a>
+  <div class="stats"><div class="stats">
+<div class="stat">
+  <span class="num">0.03</span>
+  <span class="label">messages/sec</span>
+</div>
+<div class="stat">
+  <span class="num">446:21</span>
+  <span class="label">elapsed</span>
+</div>
+<div class="stat">
+  <span class="num">808</span>
+  <span class="label">Messages</span>
+</div>
+<div class="stat">
+  <span class="num">1</span>
+  <span class="label">Nodes</span>
+</div>
+<div class="stat">
+  <span class="num">1</span>
+  <span class="label">Streams</span>
+</div></div></div>
+  <div style="clear: both;" <="" div="">
+</div></div></div></div>
+    <script>
+      var ws = new WebSocket('ws://192.168.3.200:1578/?domain=test.com');
+      ws.onopen = function() {
+        //document.body.style.backgroundColor = '#cfc';
+      };
+      ws.onclose = function() {
+        //document.body.style.backgroundColor = null;
+      };
+      ws.onmessage = function(event) {
+        var lb = document.getElementById('logbody');
+        var span = document.createElement("span");
+        span.setAttribute("class", "message");
+        span.innerHTML = event.data;
+        var p = document.createElement("p");
+        p.appendChild(span);
+        lb.appendChild(p);
+	  	var elem = document.getElementsByClassName('messages');
+	 	 elem[0].scrollTop = elem[0].scrollHeight;         
+      };
+	//window.setInterval(function() {
+	//  var elem = document.getElementsByClassName('messages');
+	//  elem[0].scrollTop = elem[0].scrollHeight;
+	//}, 5000);      
+    </script>
+</body>
