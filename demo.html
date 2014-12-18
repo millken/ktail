@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>websocketd count example</title>
+    <style>
+      #count {
+        font: bold 150px arial;
+        margin: auto;
+        padding: 10px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="count"></div>
+
+    <script>
+      var ws = new WebSocket('ws://127.0.0.1:1578/');
+
+      ws.onmessage = function(event) {
+      	console.log('Count is: ' + event.data);
+        document.getElementById('count').innerText = event.data;
+      };
+    </script>
+
+  </body>
+</html>
