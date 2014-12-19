@@ -8,8 +8,11 @@ import (
 	"time"
 	"strings"
 	"sync"
+	"runtime"
+	"flag"
 )
 var (
+	logDir,listenAddr string
 	domainCh = make(chan string)
 	Message = websocket.Message
 	Clients = make(map[string]*ClientConn)
@@ -37,10 +40,10 @@ func worker(ch chan string, wg *sync.WaitGroup) {
 
 func tailWorker(domain string) {
 	var osize, nsize int64
-	fname := domain + ".log"
+	fname := logDir + domain + "/" + domain + "__.log"
 	buf := make([]byte, 1)
 	
-	log.Printf("domain [%s] start\n", domain)
+	log.Printf("domain [%s] start , file : %s\n", domain, fname)
 	if file, err := os.Open(fname); err == nil {
 		defer file.Close()
 
@@ -120,15 +123,20 @@ func tailServer(ws *websocket.Conn) {
 
 func startServer() {
 	http.Handle("/", websocket.Handler(tailServer))
-	err := http.ListenAndServe(":1578", nil)
+	err := http.ListenAndServe(listenAddr, nil)
 	if err != nil {
 		panic("ListenAndServe: " + err.Error())
 	}	
 }
 
 func main() {
+	flag.StringVar(&logDir, "dir", "/var/log/", "dir of log path")
+	flag.StringVar(&listenAddr, "a", ":1578", `address to listen on; ":1578" (default websocket port)"`)
+	flag.Parse()
+	numCpus := runtime.NumCPU()
+	runtime.GOMAXPROCS(numCpus)
 	wg := new(sync.WaitGroup)
-	for i := 0; i < 3; i++ {
+	for i := 0; i < numCpus; i++ {
 		wg.Add(1)
 		go worker(domainCh, wg)
 	}
