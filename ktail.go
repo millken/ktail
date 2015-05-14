@@ -13,37 +13,37 @@ import (
 )
 var (
 	logDir,listenAddr string
-	domainCh = make(chan string)
+	nameCh = make(chan string)
 	Message = websocket.Message
 	Clients = make(map[string]*ClientConn)
-	DomainMap = make(map[string]int)
+	NameMap = make(map[string]int)
 )
 
 type ClientConn struct {
 	websocket *websocket.Conn
-	domain string
+	name string
 }
 
 func worker(ch chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for _c := range ch {
-		_, ok := DomainMap[_c]
+		_, ok := NameMap[_c]
 		if !ok {
-			DomainMap[_c] = 1
+			NameMap[_c] = 1
 			go tailWorker(_c)
 		}
-		log.Printf("domain : %s has %d clients\n", _c, DomainMap[_c])
+		log.Printf("name : %s has %d clients\n", _c, NameMap[_c])
 	}
 
 }
 
-func tailWorker(domain string) {
+func tailWorker(name string) {
 	var osize, nsize int64
-	fname := logDir + domain + "/" + domain + "__.log"
+	fname := logDir + name
 	buf := make([]byte, 1)
 	
-	log.Printf("domain [%s] start , file : %s\n", domain, fname)
+	log.Printf("websocket tail file : %s\n", fname)
 	if file, err := os.Open(fname); err == nil {
 		defer file.Close()
 
@@ -73,7 +73,7 @@ T1:
 					}
 					_nums := 0
 					for _, client := range Clients {
-						if client.domain == domain {
+						if client.name == name {
 							_nums ++
 							Message.Send(client.websocket, strings.Join(row, ""))
 						}
@@ -81,7 +81,7 @@ T1:
 					if _nums == 0 {
 						break T1
 					}
-					DomainMap[domain] = _nums + 1
+					NameMap[name] = _nums + 1
 					osize = nsize
 				}
 				
@@ -90,8 +90,8 @@ T1:
 			}
 		}
 	}
-	log.Printf("domain [%s] exit\n", domain)
-	delete(DomainMap, domain)
+	log.Printf("name [%s] exit\n", name)
+	delete(NameMap, name)
 }
 
 
@@ -104,11 +104,11 @@ func tailServer(ws *websocket.Conn) {
 		}
 	}()
 	q := ws.Request().URL.Query()
-	domain := q.Get("domain")
-	domainCh <- domain
+	name := q.Get("name")
+	nameCh <- name
 		
 	client := ws.Request().RemoteAddr
-	c := &ClientConn{ws, domain}
+	c := &ClientConn{ws, name}
 	Clients[client] = c
 	for {
 		var msg string
@@ -138,11 +138,11 @@ func main() {
 	wg := new(sync.WaitGroup)
 	for i := 0; i < numCpus; i++ {
 		wg.Add(1)
-		go worker(domainCh, wg)
+		go worker(nameCh, wg)
 	}
 	
 	startServer()
-	close(domainCh)
+	close(nameCh)
 
 	wg.Wait()
 }
